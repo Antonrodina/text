@@ -1,0 +1,50 @@
+plugins {
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
+
+repositories {
+    jcenter()
+}
+
+version = '1.0-SNAPSHOT'
+mainClassName = 'io.vertx.core.Launcher'
+
+def vertxVersion = '3.5.1'
+def jerseyVersion = '2.27'
+def wiremockVersion = '2.17.0'
+def mainVerticleName = 'text.MainVerticle'
+def slf4jVersion = '1.7.25'
+def hamcrestJavaVersion = '2.0.0.0'
+
+dependencies {
+    compile "io.vertx:vertx-core:$vertxVersion"
+    compile "io.vertx:vertx-web:$vertxVersion"
+    compile "org.glassfish.jersey.core:jersey-client:$jerseyVersion"
+    compile "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
+    compile "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion";
+    compile "org.slf4j:slf4j-api:$slf4jVersion";
+    compile "org.slf4j:slf4j-simple:$slf4jVersion";
+    testCompile "junit:junit:4.12"
+    testCompile "io.vertx:vertx-unit:$vertxVersion"
+    testCompile "com.github.tomakehurst:wiremock:$wiremockVersion"
+    testCompile "org.hamcrest:java-hamcrest:$hamcrestJavaVersion"
+}
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes "Main-Verticle": mainVerticleName
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+
+run {
+    args = ['run', mainVerticleName, "--launcher-class=$mainClassName"]
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.5.1'
+}
